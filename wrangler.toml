@@ -1,0 +1,26 @@
+name = "digikeysearch"
+main = "src/index.ts"
+compatibility_date = "2025-09-06"
+compatibility_flags = ["nodejs_compat"]
+
+routes = [
+  { pattern = "digikeysearch.tscircuit.com", custom_domain = true }
+]
+
+[vars]
+DIGIKEY_API_BASE_URL = "https://api.digikey.com"
+DIGIKEY_SITE = "US"
+DIGIKEY_LANGUAGE = "en"
+DIGIKEY_CURRENCY = "USD"
+DIGIKEY_CACHE_TTL_SECONDS = "86400"
+DIGIKEY_STALE_TTL_SECONDS = "604800"
+DIGIKEY_MIN_REMAINING = "25"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "digikeysearch"
+database_id = "46b54a48-27da-443c-a3e5-41f61a901a05"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["17 */6 * * *"]
