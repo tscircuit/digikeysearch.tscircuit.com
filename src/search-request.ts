@@ -47,11 +47,17 @@ export const createSearchRequest = (
     ? buildCategoryKeywords(category, url.searchParams)
     : (url.searchParams.get("q") ?? url.searchParams.get("search") ?? "").trim()
 
-  const postFilters = Object.fromEntries(
-    (category?.filters ?? [])
-      .map((filter) => [filter.name, url.searchParams.get(filter.name)?.trim()])
-      .filter((entry): entry is [string, string] => Boolean(entry[1])),
-  )
+  const postFilters = {
+    ...Object.fromEntries(
+      (category?.filters ?? [])
+        .map((filter) => [
+          filter.name,
+          url.searchParams.get(filter.name)?.trim(),
+        ])
+        .filter((entry): entry is [string, string] => Boolean(entry[1])),
+    ),
+    ...(category?.requiredPostFilters ?? {}),
+  }
 
   return {
     query,

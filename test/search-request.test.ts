@@ -38,4 +38,21 @@ describe("search request normalization", () => {
     expect(first.responseKey).toBe("resistors")
     expect(await getSearchCacheKey(first)).toBe(await getSearchCacheKey(second))
   })
+
+  it("keeps the Micro USB category restricted to micro connector types", () => {
+    const category = CATEGORY_BY_PATH.get("/micro_usb_connectors/list")
+    const request = createSearchRequest(
+      new URL(
+        "https://example.test/micro_usb_connectors/list?number_of_contacts=5",
+      ),
+      category,
+    )
+
+    expect(request.query).toBe("USB micro connector 5")
+    expect(request.responseKey).toBe("micro_usb_connectors")
+    expect(request.postFilters).toEqual({
+      connector_type: "micro",
+      number_of_contacts: "5",
+    })
+  })
 })

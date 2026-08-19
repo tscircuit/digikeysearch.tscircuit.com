@@ -4,6 +4,7 @@ export interface CategoryDefinition {
   query: string
   responseKey: string
   filters?: Array<{ name: string; label: string; placeholder?: string }>
+  requiredPostFilters?: Record<string, string>
 }
 
 const commonPackage = {
@@ -81,6 +82,18 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     query: "USB Type-C connector",
     responseKey: "usb_c_connectors",
     filters: [commonPackage],
+  },
+  {
+    path: "/micro_usb_connectors/list",
+    label: "Micro USB Connectors",
+    query: "USB micro connector",
+    responseKey: "micro_usb_connectors",
+    requiredPostFilters: { connector_type: "micro" },
+    filters: [
+      commonPackage,
+      { name: "number_of_contacts", label: "Contacts", placeholder: "5" },
+      { name: "gender", label: "Gender", placeholder: "Receptacle" },
+    ],
   },
   {
     path: "/pcie_m2_connectors/list",
