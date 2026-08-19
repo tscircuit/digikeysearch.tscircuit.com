@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { applyPostFilters, normalizeKeywordResponse } from "../src/normalize"
+import type { NormalizedPart } from "../src/types"
 
 describe("normalizeKeywordResponse", () => {
   it("selects the most-stocked non-marketplace variation and common fields", () => {
@@ -54,7 +55,7 @@ describe("normalizeKeywordResponse", () => {
   })
 
   it("applies exact package filters without 0603 metric-size collisions", () => {
-    const parts = [
+    const parts: NormalizedPart[] = [
       {
         digikey_product_number: "0603-ND",
         supplier_part_number: "0603-ND",
@@ -99,5 +100,57 @@ describe("normalizeKeywordResponse", () => {
 
     expect(applyPostFilters(parts, { package: "0603" })).toHaveLength(1)
     expect(applyPostFilters(parts, { package: "0603" })[0].mfr).toBe("A")
+  })
+
+  it("keeps Micro USB category results from including full-size USB-B", () => {
+    const parts: NormalizedPart[] = [
+      {
+        digikey_product_number: "USB-B-ND",
+        supplier_part_number: "USB-B-ND",
+        mfr: "USB-B1HSB6",
+        manufacturer: "Maker",
+        package: "",
+        description: "CONN RCPT TYPEB 4POS R/A",
+        detailed_description: "USB-B receptacle connector",
+        stock: 138_792,
+        price: 0.6,
+        category: "Connectors",
+        subcategory: "Connectors",
+        product_url: "",
+        datasheet_url: "",
+        photo_url: "",
+        normally_stocking: true,
+        discontinued: false,
+        marketplace: false,
+        parameters: { "Connector Type": "USB-B (USB TYPE-B)" },
+      },
+      {
+        digikey_product_number: "MICRO-B-ND",
+        supplier_part_number: "MICRO-B-ND",
+        mfr: "10118194-0001LF",
+        manufacturer: "Maker",
+        package: "",
+        description: "CONN RCPT USB2.0 MICRO B SMD R/A",
+        detailed_description: "USB - micro B receptacle connector",
+        stock: 86_342,
+        price: 0.5,
+        category: "Connectors",
+        subcategory: "Connectors",
+        product_url: "",
+        datasheet_url: "",
+        photo_url: "",
+        normally_stocking: true,
+        discontinued: false,
+        marketplace: false,
+        parameters: {
+          "Connector Type": "USB - micro B",
+          "Number of Contacts": "5",
+        },
+      },
+    ]
+
+    expect(applyPostFilters(parts, { connector_type: "micro" })).toEqual([
+      parts[1],
+    ])
   })
 })

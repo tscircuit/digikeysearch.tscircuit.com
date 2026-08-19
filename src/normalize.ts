@@ -170,6 +170,12 @@ const PARAMETER_NAMES: Record<string, string[]> = {
   color: ["Color"],
   pitch: ["Pitch"],
   num_pins: ["Number of Positions", "Number of Contacts", "Positions"],
+  number_of_contacts: [
+    "Number of Contacts",
+    "Number of Positions",
+    "Positions",
+  ],
+  connector_type: ["Connector Type"],
   gender: ["Connector Type", "Gender"],
 }
 
