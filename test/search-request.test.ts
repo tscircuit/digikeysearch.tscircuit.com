@@ -55,4 +55,22 @@ describe("search request normalization", () => {
       number_of_contacts: "5",
     })
   })
+
+  it("uses DC power terminology and a required Barrel Jack guard", () => {
+    const category = CATEGORY_BY_PATH.get("/barrel_jacks/list")
+    const request = createSearchRequest(
+      new URL(
+        "https://example.test/barrel_jacks/list?inside_diameter_mm=2.1mm&outside_diameter_mm=5.5mm",
+      ),
+      category,
+    )
+
+    expect(request.query).toBe("DC power jack connector 2.1mm 5.5mm")
+    expect(request.responseKey).toBe("barrel_jacks")
+    expect(request.postFilters).toEqual({
+      barrel_jack: "true",
+      inside_diameter_mm: "2.1mm",
+      outside_diameter_mm: "5.5mm",
+    })
+  })
 })

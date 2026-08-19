@@ -63,6 +63,30 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     ],
   },
   {
+    path: "/barrel_jacks/list",
+    label: "Barrel Jacks",
+    query: "DC power jack connector",
+    responseKey: "barrel_jacks",
+    requiredPostFilters: { barrel_jack: "true" },
+    filters: [
+      {
+        name: "inside_diameter_mm",
+        label: "Inside Diameter",
+        placeholder: "2.1mm",
+      },
+      {
+        name: "outside_diameter_mm",
+        label: "Outside Diameter",
+        placeholder: "5.5mm",
+      },
+      {
+        name: "mounting_style",
+        label: "Mounting",
+        placeholder: "Through Hole",
+      },
+    ],
+  },
+  {
     path: "/dimm_connectors/list",
     label: "DIMM Connectors",
     query: "DIMM connector",

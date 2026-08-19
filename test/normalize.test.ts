@@ -153,4 +153,73 @@ describe("normalizeKeywordResponse", () => {
       parts[1],
     ])
   })
+
+  it("keeps barrel jack results from including phone jacks", () => {
+    const parts: NormalizedPart[] = [
+      {
+        digikey_product_number: "SJ1-3533NG-ND",
+        supplier_part_number: "SJ1-3533NG-ND",
+        mfr: "SJ1-3533NG",
+        manufacturer: "Maker",
+        package: "",
+        description: "CONN JACK STEREO 3.5MM R/A",
+        detailed_description: "3.5mm phone jack",
+        stock: 100_000,
+        price: 0.5,
+        category: "Barrel Connector",
+        subcategory: "Barrel Connector",
+        product_url: "",
+        datasheet_url: "",
+        photo_url: "",
+        normally_stocking: true,
+        discontinued: false,
+        marketplace: false,
+        parameters: {
+          "Connector Type": "Phone Jack",
+          "Actual Diameter": '0.142" (3.60mm)',
+        },
+      },
+      {
+        digikey_product_number: "PJ-051AH-ND",
+        supplier_part_number: "PJ-051AH-ND",
+        mfr: "PJ-051AH",
+        manufacturer: "Maker",
+        package: "",
+        description: "CONN PWR JACK 2.1X5.5MM SOLDER",
+        detailed_description: "DC power jack connector",
+        stock: 80_000,
+        price: 0.7,
+        category: "Barrel Connector",
+        subcategory: "Barrel Connector",
+        product_url: "",
+        datasheet_url: "",
+        photo_url: "",
+        normally_stocking: true,
+        discontinued: false,
+        marketplace: false,
+        parameters: {
+          "Connector Type": "Jack",
+          "Industry Recognized Mating Diameter":
+            '2.10mm ID (0.083"), 5.50mm OD (0.217")',
+          "Actual Diameter": '0.079" (2.00mm ID), 0.236" (6.00mm OD)',
+          "Mounting Type": "Through Hole, Right Angle",
+        },
+      },
+    ]
+
+    expect(applyPostFilters(parts, { barrel_jack: "true" })).toEqual([parts[1]])
+    expect(
+      applyPostFilters(parts, {
+        barrel_jack: "true",
+        inside_diameter_mm: "2.1mm",
+        outside_diameter_mm: "5.5mm",
+      }),
+    ).toEqual([parts[1]])
+    expect(
+      applyPostFilters(parts, {
+        barrel_jack: "true",
+        inside_diameter_mm: "2.5mm",
+      }),
+    ).toEqual([])
+  })
 })
