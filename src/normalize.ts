@@ -176,7 +176,57 @@ const PARAMETER_NAMES: Record<string, string[]> = {
     "Positions",
   ],
   connector_type: ["Connector Type"],
+  mounting_style: ["Mounting Type"],
   gender: ["Connector Type", "Gender"],
+}
+
+const parseMillimeters = (value: string): number | null => {
+  const match = value.trim().match(/(-?\d+(?:\.\d+)?)\s*(?:mm)?/i)
+  if (!match) return null
+  const parsed = Number(match[1])
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+const getDiameterMillimeters = (
+  part: NormalizedPart,
+  diameter: "ID" | "OD",
+): number[] => {
+  const text = [
+    part.parameters["Industry Recognized Mating Diameter"],
+    part.parameters["Actual Diameter"],
+  ]
+    .filter(Boolean)
+    .join(" ")
+
+  const pattern = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*mm\\s*${diameter}\\b`, "gi")
+  return Array.from(text.matchAll(pattern), (match) => Number(match[1])).filter(
+    Number.isFinite,
+  )
+}
+
+const matchesDiameter = (
+  part: NormalizedPart,
+  diameter: "ID" | "OD",
+  expected: string,
+): boolean => {
+  const expectedMm = parseMillimeters(expected)
+  if (expectedMm === null) return false
+  return getDiameterMillimeters(part, diameter).some(
+    (actual) => Math.abs(actual - expectedMm) < 0.001,
+  )
+}
+
+const matchesBarrelJack = (part: NormalizedPart): boolean => {
+  const connectorType = part.parameters["Connector Type"]?.trim().toLowerCase()
+  if (connectorType !== "jack") return false
+
+  const hasBarrelDimensions =
+    getDiameterMillimeters(part, "ID").length > 0 &&
+    getDiameterMillimeters(part, "OD").length > 0
+  return (
+    hasBarrelDimensions ||
+    /\b(?:dc\s+power|barrel)\s+jack\b/i.test(toSearchText(part))
+  )
 }
 
 const matchesParameter = (
@@ -184,6 +234,16 @@ const matchesParameter = (
   filterName: string,
   expected: string,
 ): boolean => {
+  if (filterName === "barrel_jack") {
+    return expected === "true" && matchesBarrelJack(part)
+  }
+  if (filterName === "inside_diameter_mm") {
+    return matchesDiameter(part, "ID", expected)
+  }
+  if (filterName === "outside_diameter_mm") {
+    return matchesDiameter(part, "OD", expected)
+  }
+
   const values = (PARAMETER_NAMES[filterName] ?? [filterName]).flatMap(
     (name) => {
       const exact = part.parameters[name]
