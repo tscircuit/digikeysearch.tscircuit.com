@@ -101,6 +101,18 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     filters: [commonPackage],
   },
   {
+    path: "/drams/list",
+    label: "DRAM",
+    query: "DRAM memory IC",
+    responseKey: "drams",
+    requiredPostFilters: { dram: "true" },
+    filters: [
+      commonPackage,
+      { name: "memory_type", label: "Memory Type", placeholder: "DDR4" },
+      { name: "memory_size", label: "Memory Size", placeholder: "4Gbit" },
+    ],
+  },
+  {
     path: "/usb_c_connectors/list",
     label: "USB-C Connectors",
     query: "USB Type-C connector",

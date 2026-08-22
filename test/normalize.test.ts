@@ -222,4 +222,56 @@ describe("normalizeKeywordResponse", () => {
       }),
     ).toEqual([])
   })
+
+  it("keeps DRAM results from including DIMM connectors", () => {
+    const dram: NormalizedPart = {
+      digikey_product_number: "557-1234-ND",
+      supplier_part_number: "557-1234-ND",
+      mfr: "MT40A512M16LY-062E",
+      manufacturer: "Micron Technology",
+      package: "FBGA-96",
+      description: "IC DRAM 8GBIT PARALLEL 96FBGA",
+      detailed_description: "SDRAM - DDR4 Memory IC 8Gbit Parallel",
+      stock: 1200,
+      price: 8.5,
+      category: "Memory",
+      subcategory: "Memory",
+      product_url: "",
+      datasheet_url: "",
+      photo_url: "",
+      normally_stocking: true,
+      discontinued: false,
+      marketplace: false,
+      parameters: {
+        "Memory Type": "Volatile",
+        Technology: "SDRAM - DDR4",
+        "Memory Size": "8Gbit",
+        "Package / Case": "96-TFBGA",
+        "Supplier Device Package": "96-FBGA",
+      },
+    }
+    const connector: NormalizedPart = {
+      ...dram,
+      digikey_product_number: "DIMM-CONN-ND",
+      supplier_part_number: "DIMM-CONN-ND",
+      mfr: "DIMM-CONN",
+      description: "DDR4 DIMM CONNECTOR",
+      detailed_description: "Memory module connector",
+      category: "Memory Connectors",
+      subcategory: "Memory Connectors",
+      parameters: {},
+    }
+
+    expect(applyPostFilters([dram, connector], { dram: "true" })).toEqual([
+      dram,
+    ])
+    expect(
+      applyPostFilters([dram], {
+        dram: "true",
+        memory_type: "DDR4",
+        memory_size: "8Gbit",
+        package: "96-FBGA",
+      }),
+    ).toEqual([dram])
+  })
 })

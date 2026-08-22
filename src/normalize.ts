@@ -178,6 +178,8 @@ const PARAMETER_NAMES: Record<string, string[]> = {
   connector_type: ["Connector Type"],
   mounting_style: ["Mounting Type"],
   gender: ["Connector Type", "Gender"],
+  memory_type: ["Memory Type", "Technology"],
+  memory_size: ["Memory Size", "Density"],
 }
 
 const parseMillimeters = (value: string): number | null => {
@@ -229,6 +231,24 @@ const matchesBarrelJack = (part: NormalizedPart): boolean => {
   )
 }
 
+const matchesDram = (part: NormalizedPart): boolean => {
+  const technology = [
+    part.parameters["Memory Type"],
+    part.parameters.Technology,
+  ]
+    .filter(Boolean)
+    .join(" ")
+  const searchableText = toSearchText(part)
+  const isDram = /\b(?:lp)?ddr[2-5x]*\b|\bsdram\b|\bdram\b/i.test(
+    `${technology} ${searchableText}`,
+  )
+  const isModuleOrConnector =
+    /\b(?:memory\s+module|dimm|sodimm|connector)\b/i.test(
+      `${part.category} ${part.description} ${part.detailed_description}`,
+    )
+  return isDram && !isModuleOrConnector
+}
+
 const matchesParameter = (
   part: NormalizedPart,
   filterName: string,
@@ -236,6 +256,9 @@ const matchesParameter = (
 ): boolean => {
   if (filterName === "barrel_jack") {
     return expected === "true" && matchesBarrelJack(part)
+  }
+  if (filterName === "dram") {
+    return expected === "true" && matchesDram(part)
   }
   if (filterName === "inside_diameter_mm") {
     return matchesDiameter(part, "ID", expected)
