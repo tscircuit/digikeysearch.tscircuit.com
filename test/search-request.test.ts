@@ -73,4 +73,23 @@ describe("search request normalization", () => {
       outside_diameter_mm: "5.5mm",
     })
   })
+
+  it("uses a strict DRAM query and response shape", () => {
+    const category = CATEGORY_BY_PATH.get("/drams/list")
+    const request = createSearchRequest(
+      new URL(
+        "https://example.test/drams/list?package=FBGA-96&memory_type=DDR4&memory_size=4Gbit",
+      ),
+      category,
+    )
+
+    expect(request.query).toBe("DRAM memory IC FBGA-96 DDR4 4Gbit")
+    expect(request.responseKey).toBe("drams")
+    expect(request.postFilters).toEqual({
+      dram: "true",
+      memory_size: "4Gbit",
+      memory_type: "DDR4",
+      package: "FBGA-96",
+    })
+  })
 })

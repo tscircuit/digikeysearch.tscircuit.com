@@ -28,6 +28,7 @@ describe("worker routes without upstream access", () => {
     expect(html).toContain("DigiKey In-Stock Parts Engine")
     expect(html).toContain("/resistors/list")
     expect(html).toContain("/barrel_jacks/list")
+    expect(html).toContain("/drams/list")
     expect(html).toContain("/microcontrollers/list")
     expect(html).toContain("/micro_usb_connectors/list")
   })
