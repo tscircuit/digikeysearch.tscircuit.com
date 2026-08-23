@@ -78,6 +78,19 @@ DIGIKEY_CLIENT_SECRET=...
 
 Run `bun run dev`, `bun run test`, and `bun run typecheck`.
 
+## Deployment
+
+Pushes to `main` that change the Worker, migrations, or deployment configuration
+run the GitHub Actions deployment workflow. It runs the test, typecheck, and
+format checks, applies pending remote D1 migrations, and then deploys the
+Worker. The workflow can also be run manually.
+
+Configure these repository or organization Actions secrets before the first
+deployment:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN`
+
 ## Security
 
 The DigiKey client secret and access tokens are never returned by the API or
