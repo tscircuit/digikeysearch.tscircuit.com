@@ -199,7 +199,10 @@ const renderParameters = (parameters: Record<string, string>): string => {
     .join("")}</dl></details>`
 }
 
-const renderPartsTable = (parts: NormalizedPart[]): string => {
+const renderPartsTable = (
+  parts: NormalizedPart[],
+  showProcessorMetadata = false,
+): string => {
   if (parts.length === 0) return "<p>No in-stock results found.</p>"
   const rows = parts
     .map(
@@ -208,6 +211,7 @@ const renderPartsTable = (parts: NormalizedPart[]): string => {
         <td class="border border-gray-300 p-1">${escapeHtml(part.mfr)}</td>
         <td class="border border-gray-300 p-1">${escapeHtml(part.manufacturer)}</td>
         <td class="border border-gray-300 p-1">${escapeHtml(part.package)}</td>
+        ${showProcessorMetadata ? [part.chip_family, part.architecture, part.cpu_core].map((value) => `<td class="border border-gray-300 p-1">${escapeHtml(value)}</td>`).join("") : ""}
         <td class="border border-gray-300 p-1">${escapeHtml(part.description)}</td>
         <td class="border border-gray-300 p-1 text-right">${part.stock.toLocaleString("en-US")}</td>
         <td class="border border-gray-300 p-1 text-right">${escapeHtml(formatPrice(part.price))}</td>
@@ -223,6 +227,9 @@ const renderPartsTable = (parts: NormalizedPart[]): string => {
         "MFR",
         "Manufacturer",
         "Package",
+        ...(showProcessorMetadata
+          ? ["Chip Family", "Architecture", "CPU Core"]
+          : []),
         "Description",
         "Stock",
         "Price",
@@ -245,6 +252,11 @@ export const renderSearchPage = (
   requestUrl: string,
 ): string => {
   const url = new URL(requestUrl)
+  const isLinuxProcessorCategory =
+    category?.path === "/linux_capable_processors/list"
+  const description = isLinuxProcessorCategory
+    ? '<p class="my-1 text-gray-600">Application processors with documented Linux support.</p>'
+    : ""
   const freshness = payload.stale
     ? `<span class="text-amber-700">Serving stale cache while DigiKey refreshes.</span>`
     : payload.cached
@@ -253,7 +265,7 @@ export const renderSearchPage = (
 
   return renderShell(
     pathname,
-    `<div><h2>${escapeHtml(label)}</h2>${renderFilters(category, payload, url)}<div class="my-1">${freshness} ${payload.total.toLocaleString("en-US")} matching products.</div>${renderPartsTable(payload.components)}</div>`,
+    `<div><h2>${escapeHtml(label)}</h2>${description}${renderFilters(category, payload, url)}<div class="my-1">${freshness} ${payload.total.toLocaleString("en-US")} matching products.</div>${renderPartsTable(payload.components, isLinuxProcessorCategory)}</div>`,
     `${label} - DigiKey Parts Search`,
     requestUrl,
   )

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { CATEGORY_BY_PATH } from "../src/categories"
+import { buildKeywordRequest } from "../src/digikey-client"
 import {
   createSearchRequest,
   getSearchCacheKey,
@@ -7,6 +8,48 @@ import {
 } from "../src/search-request"
 
 describe("search request normalization", () => {
+  it("keeps Linux capability mandatory and derived labels out of DigiKey keywords", async () => {
+    const category = CATEGORY_BY_PATH.get("/linux_capable_processors/list")
+    expect(category).toBeDefined()
+    const url = new URL(
+      "https://example.test/linux_capable_processors/list?architecture=ARM32&chip_family=STM32MP1&cpu_core=Cortex-A7&manufacturer=497&linux_capable_processor=false",
+    )
+    const request = createSearchRequest(url, category)
+
+    expect(request.query).toBe("microprocessor Cortex-A7")
+    expect(request.responseKey).toBe("linux_capable_processors")
+    expect(request.postFilters).toEqual({
+      linux_capable_processor: "true",
+      architecture: "ARM32",
+      chip_family: "STM32MP1",
+      cpu_core: "Cortex-A7",
+    })
+    expect(buildKeywordRequest(request).FilterOptionsRequest).toMatchObject({
+      ManufacturerFilter: [{ Id: "497" }],
+      SearchOptions: ["InStock"],
+      MarketPlaceFilter: "ExcludeMarketPlace",
+    })
+
+    url.searchParams.set("architecture", "ARM64")
+    const differentArchitecture = createSearchRequest(url, category)
+    expect(differentArchitecture.query).toBe(request.query)
+    expect(await getSearchCacheKey(differentArchitecture)).not.toBe(
+      await getSearchCacheKey(request),
+    )
+    url.searchParams.set("chip_family", "TI Sitara AM335x")
+    const differentFamily = createSearchRequest(url, category)
+    expect(differentFamily.query).toBe(request.query)
+    expect(await getSearchCacheKey(differentFamily)).not.toBe(
+      await getSearchCacheKey(differentArchitecture),
+    )
+    const unfiltered = createSearchRequest(
+      new URL("https://example.test/linux_capable_processors/list"),
+      category,
+    )
+    expect(unfiltered.query).toBe("microprocessor")
+    expect(unfiltered.postFilters).toEqual({ linux_capable_processor: "true" })
+  })
+
   it("parses stable parametric filter selections", () => {
     const params = new URLSearchParams({
       param_52_3: "10k,12k",

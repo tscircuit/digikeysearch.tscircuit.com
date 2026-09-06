@@ -3,7 +3,12 @@ export interface CategoryDefinition {
   label: string
   query: string
   responseKey: string
-  filters?: Array<{ name: string; label: string; placeholder?: string }>
+  filters?: Array<{
+    name: string
+    label: string
+    placeholder?: string
+    includeInKeywords?: boolean
+  }>
   requiredPostFilters?: Record<string, string>
 }
 
@@ -290,6 +295,29 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     filters: [commonPackage],
   },
   {
+    path: "/linux_capable_processors/list",
+    label: "Linux-capable Processors",
+    query: "microprocessor",
+    responseKey: "linux_capable_processors",
+    requiredPostFilters: { linux_capable_processor: "true" },
+    filters: [
+      { name: "package", label: "Package", placeholder: "361-TFBGA" },
+      {
+        name: "chip_family",
+        label: "Chip Family",
+        placeholder: "STM32MP1",
+        includeInKeywords: false,
+      },
+      {
+        name: "architecture",
+        label: "Architecture",
+        placeholder: "ARM32, ARM64, or RISC-V64",
+        includeInKeywords: false,
+      },
+      { name: "cpu_core", label: "CPU Core", placeholder: "Cortex-A7" },
+    ],
+  },
+  {
     path: "/fpgas/list",
     label: "FPGAs & CPLDs",
     query: "FPGA CPLD",
@@ -420,6 +448,7 @@ export const buildCategoryKeywords = (
   params: URLSearchParams,
 ): string => {
   const values = (category.filters ?? [])
+    .filter((filter) => filter.includeInKeywords !== false)
     .map((filter) => params.get(filter.name)?.trim())
     .filter((value): value is string => Boolean(value))
 
