@@ -35,6 +35,21 @@ Every category page supports `.json` and `?json=true`. DigiKey parametric
 filter choices are encoded in the page URL and sent back through the V4
 `ParameterFilterRequest` contract.
 
+The [Linux-capable Processors page](https://digikeysearch.tscircuit.com/linux_capable_processors/list)
+and its `.json` API classify bare processor families with documented MMU-based
+Linux support. Results include `chip_family`, `architecture` (`ARM32`, `ARM64`,
+or `RISC-V64`), and `cpu_core`, with filters for those fields and package, plus
+the usual DigiKey manufacturer and parametric filters:
+
+```sh
+curl 'https://digikeysearch.tscircuit.com/linux_capable_processors/list.json?chip_family=STM32MP1&architecture=ARM32'
+```
+
+Classification and metadata filters apply to each fetched page (up to 50
+upstream products); `meta.total` counts the matching products on that page.
+Use `offset` to request another upstream page. See the
+[coverage policy and sources](docs/linux-capable-processors.md).
+
 ## Cache and indexing model
 
 - Exact requests are cached in D1 for 24 hours by default.

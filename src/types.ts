@@ -163,6 +163,9 @@ export interface NormalizedPart {
   discontinued: boolean
   marketplace: boolean
   parameters: Record<string, string>
+  chip_family?: string
+  architecture?: string
+  cpu_core?: string
 }
 
 export interface SearchPayload {

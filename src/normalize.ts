@@ -1,3 +1,4 @@
+import { getLinuxProcessorInfo } from "./linux-capable-processors"
 import type {
   DigiKeyKeywordResponse,
   DigiKeyProduct,
@@ -254,6 +255,22 @@ const matchesParameter = (
   filterName: string,
   expected: string,
 ): boolean => {
+  if (
+    filterName === "chip_family" ||
+    filterName === "architecture" ||
+    filterName === "cpu_core"
+  ) {
+    const actual = part[filterName]
+    if (!actual) return false
+    if (filterName === "architecture") {
+      return actual.toLowerCase() === expected.trim().toLowerCase()
+    }
+    const expectedTokens = normalizedTokens(expected).join(" ")
+    return (
+      expectedTokens.length > 0 &&
+      ` ${normalizedTokens(actual).join(" ")} `.includes(` ${expectedTokens} `)
+    )
+  }
   if (filterName === "barrel_jack") {
     return expected === "true" && matchesBarrelJack(part)
   }
@@ -303,11 +320,23 @@ export const applyPostFilters = (
   filters: Record<string, string> | undefined,
 ): NormalizedPart[] => {
   if (!filters || Object.keys(filters).length === 0) return parts
-  return parts.filter((part) =>
+  let candidates = parts
+  if ("linux_capable_processor" in filters) {
+    if (filters.linux_capable_processor !== "true") return []
+    candidates = parts.flatMap((part) => {
+      const info = getLinuxProcessorInfo(part)
+      return info && part.stock > 0 && !part.marketplace
+        ? [{ ...part, ...info }]
+        : []
+    })
+  }
+  return candidates.filter((part) =>
     Object.entries(filters).every(([name, expected]) =>
-      name === "package"
-        ? matchesPackage(part, expected)
-        : matchesParameter(part, name, expected),
+      name === "linux_capable_processor"
+        ? true
+        : name === "package"
+          ? matchesPackage(part, expected)
+          : matchesParameter(part, name, expected),
     ),
   )
 }

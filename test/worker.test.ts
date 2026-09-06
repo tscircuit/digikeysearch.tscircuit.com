@@ -31,6 +31,8 @@ describe("worker routes without upstream access", () => {
     expect(html).toContain("/drams/list")
     expect(html).toContain("/microcontrollers/list")
     expect(html).toContain("/micro_usb_connectors/list")
+    expect(html).toContain("/linux_capable_processors/list")
+    expect(html).toContain("Linux-capable Processors")
   })
 
   it("rejects empty API searches before touching D1 or DigiKey", async () => {
